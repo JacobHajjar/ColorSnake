@@ -131,14 +131,17 @@ class SnakeScene(MenuScene):
     snake_grid = []
     margin = 40
     box_size = 20
+    game_color = None
 
     def display_scene(self):
+        self.game_color = self.colors.white
         self.display_surf.fill(self.colors.black)
         width, height = self.display_surf.get_size()
 
         play_area = self.display_centered_rect(
-            (width-self.margin * 2, height-self.margin * 2), 
-            self.colors.white, 2, (width/2, height/2))
+            (width-self.margin * 2, height-self.margin * 2),
+            self.game_color, 5, (width/2, height/2))
+        print(play_area)
         self.draw_snake_grid()
 
     def generate_snake_grid(self):
@@ -156,12 +159,16 @@ class SnakeScene(MenuScene):
                 pygame.draw.rect(self.display_surf,
                                  self.colors.red, cell.grid_box, 3)
             self.snake_grid.append(row_list)
-    
+
     def draw_snake_grid(self):
         '''draws the snake grid'''
+        cell_color = self.game_color
         for row in self.snake_grid:
             for cell in row:
-                print()
+                if not cell.is_snake:
+                    cell_color = self.colors.black
+                pygame.draw.rect(self.display_surf,
+                                 cell_color, cell.grid_box, 0)
 
 
 def load_text(font, size, col, msg):
