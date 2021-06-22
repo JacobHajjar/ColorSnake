@@ -30,17 +30,17 @@ class SnakeGame:
         game_scene = SnakeScene(self.colors, self.display_surf)
         scenes = [menu, game_scene]
         while True:
+            if self.next_scene is 1:
+                scenes[1].generate_snake_grid()
             scenes[self.next_scene].start_scene()
             self.next_scene = scenes[self.next_scene].next_scene
             print("SCENE CHANGED!!")
-
 
 
 def main():
     '''the main function to run the game'''
     game1 = SnakeGame()
     game1.play_snake()
-
 
 
 if __name__ == '__main__':

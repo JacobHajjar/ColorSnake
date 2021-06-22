@@ -1,8 +1,10 @@
 '''Class containing all of the game's scenes'''
+
 import random
 import sys
 import pygame
 from pygame.locals import *
+from cell import Cell
 pygame.init()
 
 
@@ -135,24 +137,31 @@ class SnakeScene(MenuScene):
         width, height = self.display_surf.get_size()
 
         play_area = self.display_centered_rect(
-            (width-self.margin * 2, height-self.margin * 2), self.colors.white, 2, (width/2, height/2))
+            (width-self.margin * 2, height-self.margin * 2), 
+            self.colors.white, 2, (width/2, height/2))
         self.draw_snake_grid()
 
-    def draw_snake_grid(self):
-        '''draws the game grid for snake'''
+    def generate_snake_grid(self):
+        '''generates the game grid for snake'''
         width, height = self.display_surf.get_size()
         margin = self.margin
         box_size = self.box_size
 
-        for x_val in range(margin, width-margin, box_size):
-            row = []
-            for y_val in range(margin, height-margin, box_size):
-                grid_box = pygame.Rect(x_val, y_val, box_size, box_size)
-                row.append(grid_box)
-
-                pygame.draw.rect(self.display_surf,self.colors.white, grid_box, 2)
-            print(row)
-            self.snake_grid.append(row)
+        for row in range(margin, width-margin, box_size):
+            row_list = []
+            for col in range(margin, height-margin, box_size):
+                grid_box = pygame.Rect(row, col, box_size, box_size)
+                cell = Cell(grid_box, False)
+                row_list.append(cell)
+                pygame.draw.rect(self.display_surf,
+                                 self.colors.red, cell.grid_box, 3)
+            self.snake_grid.append(row_list)
+    
+    def draw_snake_grid(self):
+        '''draws the snake grid'''
+        for row in self.snake_grid:
+            for cell in row:
+                print()
 
 
 def load_text(font, size, col, msg):
