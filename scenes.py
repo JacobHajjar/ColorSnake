@@ -1,5 +1,5 @@
 '''Class containing all of the game's scenes'''
-
+import math
 import random
 import sys
 import pygame
@@ -13,21 +13,20 @@ class MenuScene:
     in_scene = True
     curr_mouse = [-1, -1]
     curr_direction = 'up'
-    next_scene = 0
+    next_scene = 1
 
-    def __init__(self, colors, display_surf):
+    def __init__(self, colors, display_surf, fps):
         self.colors = colors
         self.display_surf = display_surf
+        self.fps = fps
 
     def start_scene(self):
         '''runs the scene in the game'''
-        fps = 30
         self.in_scene = True
         self.display_surf.fill(self.colors.white)
         fps_clock = pygame.time.Clock()
         while self.in_scene:  # game started loop
             self.curr_mouse = [-1, -1]
-            self.curr_direction = None
             for event in pygame.event.get():  # event handling loop
                 #pylint: disable=E0602
                 # ^ pylint doesn't like pygame event variables :(
@@ -46,9 +45,11 @@ class MenuScene:
                         self.curr_direction = 'up'
                     elif event.key in (K_DOWN, K_s):
                         self.curr_direction = 'down'
+                    else:
+                        self.curr_direction = self.curr_direction
             self.display_scene()
             pygame.display.update()
-            fps_clock.tick(fps)
+            fps_clock.tick(self.fps)
 
     def display_scene(self):
         '''the logic and objects displayed in the scene'''
@@ -56,13 +57,9 @@ class MenuScene:
         row_height = height * 5 / 6
         menu_button_size = (160, 40)
 
-        # gray box for decoration
         text_rend, text_box = load_text(
             'title_font.otf', 120, self.colors.black, 'SNAKE')
         self.display_centered_text(text_rend, text_box, (width/2, height/3))
-
-        self.display_centered_rect(
-            (width, 70), self.colors.lgray, 0, (width/2, row_height))
         # start button
         start_clicked = self.display_button_click(
             menu_button_size, (width / 2, row_height), self.colors.red, self.colors.black)
@@ -114,13 +111,16 @@ class MenuScene:
 
     def display_button_click(self, xy_size, xycenter_position, b_color, o_color):
         '''function for displaying a button that can return a true or false if clicked'''
-        o_size = 3
+        o_size = 4
+        bor_color = self.colors.lgray
         mousex, mousey = pygame.mouse.get_pos()
         start_button = self.display_centered_rect(
             xy_size, b_color, 0, xycenter_position)
         if start_button.collidepoint(mousex, mousey):
-            self.display_centered_rect(
-                xy_size, o_color, o_size, xycenter_position)
+            bor_color = o_color
+        self.display_centered_rect(
+            xy_size, bor_color, o_size, xycenter_position)
+
         if start_button.collidepoint(self.curr_mouse[0], self.curr_mouse[1]):
             return True
         return False
@@ -129,9 +129,11 @@ class MenuScene:
 class SnakeScene(MenuScene):
     '''scene for the main snake game'''
     snake_grid = []
+    snake_body = []
     margin = 40
-    box_size = 20
+    box_size = 16
     game_color = None
+    next_scene = 2
 
     def display_scene(self):
         self.game_color = self.colors.white
@@ -140,8 +142,8 @@ class SnakeScene(MenuScene):
 
         play_area = self.display_centered_rect(
             (width-self.margin * 2, height-self.margin * 2),
-            self.game_color, 5, (width/2, height/2))
-        print(play_area)
+            self.game_color, 8, (width/2, height/2))
+        self.move_snake()
         self.draw_snake_grid()
 
     def generate_snake_grid(self):
@@ -149,26 +151,52 @@ class SnakeScene(MenuScene):
         width, height = self.display_surf.get_size()
         margin = self.margin
         box_size = self.box_size
-
-        for row in range(margin, width-margin, box_size):
-            row_list = []
-            for col in range(margin, height-margin, box_size):
-                grid_box = pygame.Rect(row, col, box_size, box_size)
-                cell = Cell(grid_box, False)
-                row_list.append(cell)
-                pygame.draw.rect(self.display_surf,
-                                 self.colors.red, cell.grid_box, 3)
-            self.snake_grid.append(row_list)
+        for col_index, col in enumerate(range(margin, width-margin, box_size)):
+            col_list = []
+            for row_index, row in enumerate(range(margin, height-margin, box_size)):
+                grid_box = pygame.Rect(col, row, box_size, box_size)
+                cell = Cell(grid_box, False, self.colors.black,
+                            col_index, row_index)
+                col_list.append(cell)
+            self.snake_grid.append(col_list)
 
     def draw_snake_grid(self):
         '''draws the snake grid'''
-        cell_color = self.game_color
-        for row in self.snake_grid:
-            for cell in row:
-                if not cell.is_snake:
-                    cell_color = self.colors.black
-                pygame.draw.rect(self.display_surf,
-                                 cell_color, cell.grid_box, 0)
+        for body in self.snake_body:
+            col, row = body.get_location()
+            self.snake_grid[col][row].is_snake = True
+        
+        for col in self.snake_grid:
+            for cell in col:
+                cell.draw_cell(self.display_surf, self.game_color)
+
+    def create_snake(self):
+        '''function that creates the '''
+        x_grid = math.floor(len(self.snake_grid)/2)
+        y_grid = math.floor(len(self.snake_grid[1])/2)
+        for i in range(3):
+            self.snake_grid[x_grid][y_grid+i].is_snake = True
+            self.snake_body.append(self.snake_grid[x_grid][y_grid+i])
+
+    def move_snake(self):
+        '''function that moves the snake for one frame'''
+        if self.curr_direction == 'up':
+            col, row = self.snake_body[0].get_location()
+            self.snake_body.insert(0, self.snake_grid[col][row-1])
+        elif self.curr_direction == 'down':
+            col, row = self.snake_body[0].get_location()
+            self.snake_body.insert(0, self.snake_grid[col][row+1])
+        elif self.curr_direction == 'left':
+            col, row = self.snake_body[0].get_location()
+            self.snake_body.insert(0, self.snake_grid[col-1][row])
+        elif self.curr_direction == 'right':
+            col, row = self.snake_body[0].get_location()
+            self.snake_body.insert(0, self.snake_grid[col+1][row])
+        else:
+            print(self.curr_direction)
+        col, row = self.snake_body[-1].get_location()
+        self.snake_grid[col][row].is_snake = False
+        self.snake_body.pop()
 
 
 def load_text(font, size, col, msg):
