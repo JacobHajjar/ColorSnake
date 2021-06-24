@@ -23,7 +23,6 @@ class MenuScene:
     def start_scene(self):
         '''runs the scene in the game'''
         self.in_scene = True
-        self.display_surf.fill(self.colors.white)
         fps_clock = pygame.time.Clock()
         while self.in_scene:  # game started loop
             self.curr_mouse = [-1, -1]
@@ -45,14 +44,13 @@ class MenuScene:
                         self.curr_direction = 'up'
                     elif event.key in (K_DOWN, K_s):
                         self.curr_direction = 'down'
-                    else:
-                        self.curr_direction = self.curr_direction
             self.display_scene()
             pygame.display.update()
             fps_clock.tick(self.fps)
 
     def display_scene(self):
         '''the logic and objects displayed in the scene'''
+        self.display_surf.fill(self.colors.white)
         width, height = self.display_surf.get_size()
         row_height = height * 5 / 6
         menu_button_size = (160, 40)
@@ -133,7 +131,7 @@ class SnakeScene(MenuScene):
     margin = 40
     box_size = 16
     game_color = None
-    next_scene = 2
+    next_scene = 0
 
     def display_scene(self):
         self.game_color = self.colors.white
@@ -148,6 +146,7 @@ class SnakeScene(MenuScene):
 
     def generate_snake_grid(self):
         '''generates the game grid for snake'''
+        self.snake_grid = []
         width, height = self.display_surf.get_size()
         margin = self.margin
         box_size = self.box_size
@@ -162,16 +161,17 @@ class SnakeScene(MenuScene):
 
     def draw_snake_grid(self):
         '''draws the snake grid'''
-        for body in self.snake_body:
-            col, row = body.get_location()
-            self.snake_grid[col][row].is_snake = True
-        
-        for col in self.snake_grid:
-            for cell in col:
-                cell.draw_cell(self.display_surf, self.game_color)
+        if self.in_scene == True:
+            for body in self.snake_body:
+                col, row = body.get_location()
+                self.snake_grid[col][row].is_snake = True
+            for col in self.snake_grid:
+                for cell in col:
+                    cell.draw_cell(self.display_surf, self.game_color)
 
     def create_snake(self):
         '''function that creates the '''
+        self.snake_body = []
         x_grid = math.floor(len(self.snake_grid)/2)
         y_grid = math.floor(len(self.snake_grid[1])/2)
         for i in range(3):
@@ -180,20 +180,27 @@ class SnakeScene(MenuScene):
 
     def move_snake(self):
         '''function that moves the snake for one frame'''
-        if self.curr_direction == 'up':
-            col, row = self.snake_body[0].get_location()
-            self.snake_body.insert(0, self.snake_grid[col][row-1])
-        elif self.curr_direction == 'down':
-            col, row = self.snake_body[0].get_location()
-            self.snake_body.insert(0, self.snake_grid[col][row+1])
-        elif self.curr_direction == 'left':
-            col, row = self.snake_body[0].get_location()
-            self.snake_body.insert(0, self.snake_grid[col-1][row])
-        elif self.curr_direction == 'right':
-            col, row = self.snake_body[0].get_location()
-            self.snake_body.insert(0, self.snake_grid[col+1][row])
-        else:
-            print(self.curr_direction)
+        col, row = self.snake_body[0].get_location()
+        try:
+            if self.curr_direction == 'up':
+                self.snake_body.insert(0, self.snake_grid[col][row-1])
+                if row == 0:
+                    self.in_scene = False
+            elif self.curr_direction == 'down':
+                self.snake_body.insert(0, self.snake_grid[col][row+1])
+            elif self.curr_direction == 'left':
+                self.snake_body.insert(0, self.snake_grid[col-1][row])
+                if col == 0:
+                    self.in_scene = False
+            elif self.curr_direction == 'right':
+                self.snake_body.insert(0, self.snake_grid[col+1][row])
+            else:
+                print(self.curr_direction)
+        except IndexError:
+            self.in_scene = False
+
+        print(row)
+        print(col)
         col, row = self.snake_body[-1].get_location()
         self.snake_grid[col][row].is_snake = False
         self.snake_body.pop()

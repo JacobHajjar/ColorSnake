@@ -19,22 +19,24 @@ class SnakeGame:
                     (0,  0, 255), (0, 255,   0), (0, 255, 255), (128,  0, 128))
     window_width = 800
     window_height = 640
-    display_surf = pygame.display.set_mode((window_width, window_height))
     title = 'SNAKE'
+    display_surf = pygame.display.set_mode((window_width, window_height))
     next_scene = 0
     pygame.display.set_caption(title)
 
     def play_snake(self):
         '''function which plays a round of snake'''
-        menu = MenuScene(self.colors, self.display_surf, 30)
-        game_scene = SnakeScene(self.colors, self.display_surf, 5)
-        scenes = [menu, game_scene]
         while True:
-            if self.next_scene == 1:
-                scenes[1].generate_snake_grid()
-                scenes[1].create_snake()
-            scenes[self.next_scene].start_scene()
-            self.next_scene = scenes[self.next_scene].next_scene
+            if self.next_scene == 0:
+                menu = MenuScene(self.colors, self.display_surf, 30)
+                menu.start_scene()
+                self.next_scene = menu.next_scene
+            elif self.next_scene == 1:
+                game_scene = SnakeScene(self.colors, self.display_surf, 5)
+                game_scene.generate_snake_grid()
+                game_scene.create_snake()
+                game_scene.start_scene()
+                self.next_scene = game_scene.next_scene      
 
 
 def main():
