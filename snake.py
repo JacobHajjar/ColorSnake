@@ -32,11 +32,9 @@ class SnakeGame:
                 menu.start_scene()
                 self.next_scene = menu.next_scene
             elif self.next_scene == 1:
-                game_scene = SnakeScene(self.colors, self.display_surf, 5)
-                game_scene.generate_snake_grid()
-                game_scene.create_snake()
+                game_scene = SnakeScene(self.colors, self.display_surf, 10)
                 game_scene.start_scene()
-                self.next_scene = game_scene.next_scene      
+                self.next_scene = game_scene.next_scene
 
 
 def main():
