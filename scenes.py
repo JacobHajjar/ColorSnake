@@ -15,6 +15,7 @@ class MenuScene:
     curr_mouse = [-1, -1]
     curr_direction = 'up'
     next_scene = 1
+    dif_selection = 1
 
     def __init__(self, colors, display_surf, fps):
         self.colors = colors
@@ -52,10 +53,12 @@ class MenuScene:
             self.display_scene()
             pygame.display.update()
             fps_clock.tick(self.fps)
+        return self.dif_selection * 5
 
     def setup_scene(self):
         '''function which must runs once before the main game loop'''
         self.in_scene = True
+        self.dif_selection = 1
 
     def display_scene(self):
         '''the logic and objects displayed in the scene'''
@@ -77,10 +80,17 @@ class MenuScene:
         # game difficulty button
         difficulty_clicked = self.display_button_click(
             menu_button_size, (width / 5, row_height), self.colors.lime, self.colors.black)
-        text_rend, text_box = load_text(
-            'game_over.ttf', 70, self.colors.black, 'DIFFICULTY')
+
+        dif_rend, dif_box = load_text(
+            'game_over.ttf', 70, self.colors.black, 'DIFFICULTY: ')
+
         self.display_centered_text(
-            text_rend, text_box, (width / 5, row_height))
+            dif_rend, dif_box, (width / 5-10, row_height))
+
+        text_rend, text_box = load_text(
+            'game_over.ttf', 70, self.colors.black, str(self.dif_selection))
+        self.display_left_text(
+            text_rend, text_box, dif_box.bottomright)
         # highscore button
         highscore_clicked = self.display_button_click(
             menu_button_size, (width * 4 / 5, row_height), self.colors.aqua, self.colors.black)
@@ -90,10 +100,13 @@ class MenuScene:
             text_rend, text_box, (width * 4 / 5, row_height))
 
         if start_clicked:
-            self.next_scene = 1
+            self.next_scene = 2
             self.in_scene = False
         elif difficulty_clicked:
-            print("Difficulty Selected")
+            if self.dif_selection < 4:
+                self.dif_selection += 1
+            else:
+                self.dif_selection = 1
         elif highscore_clicked:
             print("button3")
 
@@ -140,7 +153,7 @@ class SnakeScene(MenuScene):
     margin = 40
     food_color = None
     game_color = None
-    next_scene = 0
+    next_scene = 1
     food_spawned = False
     player_score = None
 
@@ -184,6 +197,7 @@ class SnakeScene(MenuScene):
         '''function which must runs once before the main game loop'''
         self.game_color = self.colors.red
         self.player_score = TimerScore(3000, 0)
+        self.player_score.import_scores()
         self.in_scene = True
         self.generate_snake_grid()
         self.create_snake()
@@ -194,7 +208,7 @@ class SnakeScene(MenuScene):
         self.food_spawned = False
         width, height = self.display_surf.get_size()
         margin = self.margin
-        box_size = 16
+        box_size = 20
         for col_index, col in enumerate(range(margin, width-margin, box_size)):
             col_list = []
             for row_index, row in enumerate(range(margin, height-margin, box_size)):
@@ -259,7 +273,7 @@ class SnakeScene(MenuScene):
             self.snake_grid[col][row].is_snake = False
             self.snake_body.pop()
         if self.in_scene is False:
-            self.player_score.save_scores()
+            self.player_score.save_scores("John")
 
     def spawn_food(self):
         '''spawns the food when no fodo is present'''
@@ -273,6 +287,65 @@ class SnakeScene(MenuScene):
             self.food_color = self.colors[rand_color_index]
             self.snake_grid[col][row].is_food = True
             self.food_spawned = True
+
+
+class ScoresScene(MenuScene):
+    high_scores = None
+
+    def display_scene(self):
+        width, height = self.display_surf.get_size()
+        row_height = height * 5 / 6
+        menu_button_size = (220, 40)
+        # play again button
+        play_clicked = self.display_button_click(
+            menu_button_size, (width / 2, row_height), self.colors.red, self.colors.black)
+        text_rend, text_box = load_text(
+            'game_over.ttf', 70, self.colors.black, 'Play again?')
+        self.display_centered_text(
+            text_rend, text_box, (width / 2, row_height))
+        # scoreboard
+        title_list = ['High Score', 'Name', 'Minutes', 'Date Played']
+        text_size = 55
+        title_height = 1/14
+
+        rank_rend, rank_box = load_text(
+            'game_over.ttf', text_size, self.colors.black,
+            'Ranking#')
+        self.display_centered_text(
+            rank_rend, rank_box, (width * 1 / 7, height * title_height))
+        height_spacer = 1/7
+        for i in range(5):
+            text_rend, text_box = load_text(
+                'game_over.ttf', text_size, self.colors.black, str(i+1))
+            self.display_centered_text(
+                text_rend, text_box, (width * 1 / 7, height * height_spacer))
+            height_spacer += 1/7
+
+        width_spacer = 2/7
+        for i, sec_title in enumerate(title_list):
+            height_spacer = 1/7
+            rend, box = load_text(
+                'game_over.ttf', text_size, self.colors.black,
+                sec_title)
+            self.display_centered_text(
+                rend, box, (width * width_spacer, height * title_height))
+            for j in range(5):
+                text_rend, text_box = load_text(
+                    'game_over.ttf', text_size, self.colors.black, str(self.high_scores.scores_data[j][i]))
+                self.display_centered_text(
+                    text_rend, text_box, (width * width_spacer, height * height_spacer))
+                height_spacer += 1/7
+            width_spacer += 1/7
+
+        if play_clicked:
+            self.in_scene = False
+            self.next_scene = 0
+
+    def setup_scene(self):
+        self.display_surf.fill(self.colors.white)
+        self.next_scene = 0
+        self.high_scores = TimerScore(3000, 0)
+        self.high_scores.import_scores()
 
 
 def load_text(font, size, col, msg):

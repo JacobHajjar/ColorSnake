@@ -2,7 +2,7 @@
 '''My own remake of the classic video game Snake in Pygame'''
 from collections import namedtuple
 import pygame
-from scenes import MenuScene, SnakeScene
+from scenes import MenuScene, ScoresScene, SnakeScene
 pygame.init()
 
 __author__ = 'Jacob Hajjar'
@@ -26,16 +26,20 @@ class SnakeGame:
 
     def play_snake(self):
         '''function which plays a round of snake'''
+        snake_fps = 15
         while True:
             if self.next_scene == 0:
                 menu = MenuScene(self.colors, self.display_surf, 30)
-                menu.start_scene()
+                snake_fps = menu.start_scene()   
                 self.next_scene = menu.next_scene
             elif self.next_scene == 1:
-                game_scene = SnakeScene(self.colors, self.display_surf, 10)
+                score_scene = ScoresScene(self.colors, self.display_surf, 30)
+                score_scene.start_scene()
+                self.next_scene = score_scene.next_scene
+            elif self.next_scene == 2:
+                game_scene = SnakeScene(self.colors, self.display_surf, snake_fps)
                 game_scene.start_scene()
                 self.next_scene = game_scene.next_scene
-
 
 def main():
     '''the main function to run the game'''
