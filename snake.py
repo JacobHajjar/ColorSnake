@@ -30,16 +30,18 @@ class SnakeGame:
         while True:
             if self.next_scene == 0:
                 menu = MenuScene(self.colors, self.display_surf, 30)
-                snake_fps = menu.start_scene()   
+                snake_fps = menu.start_scene()
                 self.next_scene = menu.next_scene
             elif self.next_scene == 1:
                 score_scene = ScoresScene(self.colors, self.display_surf, 30)
                 score_scene.start_scene()
                 self.next_scene = score_scene.next_scene
             elif self.next_scene == 2:
-                game_scene = SnakeScene(self.colors, self.display_surf, snake_fps)
+                game_scene = SnakeScene(
+                    self.colors, self.display_surf, snake_fps)
                 game_scene.start_scene()
                 self.next_scene = game_scene.next_scene
+
 
 def main():
     '''the main function to run the game'''

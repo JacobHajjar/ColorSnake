@@ -16,6 +16,7 @@ class MenuScene:
     curr_direction = 'up'
     next_scene = 1
     dif_selection = 1
+    player_score = None
 
     def __init__(self, colors, display_surf, fps):
         self.colors = colors
@@ -59,6 +60,11 @@ class MenuScene:
         '''function which must runs once before the main game loop'''
         self.in_scene = True
         self.dif_selection = 1
+        self.player_score = TimerScore(3000, 0)
+        try:
+            self.player_score.import_scores()
+        except FileNotFoundError:
+            self.player_score.populate_scores()
 
     def display_scene(self):
         '''the logic and objects displayed in the scene'''
@@ -108,7 +114,8 @@ class MenuScene:
             else:
                 self.dif_selection = 1
         elif highscore_clicked:
-            print("button3")
+            self.next_scene = 1
+            self.in_scene = False
 
     def display_centered_text(self, text_rend, text_box, xycenter_position):
         '''easy function for displaying external text centered'''
@@ -177,6 +184,12 @@ class SnakeScene(MenuScene):
             'game_over.ttf', 75, self.game_color, str(len(self.snake_body)))
         high_score, high_score_box = load_text(
             'game_over.ttf', 75, self.game_color, "HIGH SCORE: ")
+        score_num = 0
+        if len(self.player_score.scores_data) >= 1:
+            score_num = self.player_score.scores_data[0][0]
+
+        high_score_num, high_score_num_text = load_text(
+            'game_over.ttf', 75, self.game_color, str(score_num))
 
         self.display_left_text(score_render, score_box,
                                (self.margin, self.margin-5))
@@ -190,6 +203,8 @@ class SnakeScene(MenuScene):
 
         self.display_left_text(
             high_score, high_score_box, (width/2, self.margin-5))
+        self.display_left_text(
+            high_score_num, high_score_num_text, (high_score_box.right, high_score_box.bottom))
 
         self.draw_snake_grid()
 
@@ -273,7 +288,7 @@ class SnakeScene(MenuScene):
             self.snake_grid[col][row].is_snake = False
             self.snake_body.pop()
         if self.in_scene is False:
-            self.player_score.save_scores("John")
+            self.player_score.save_scores("You")
 
     def spawn_food(self):
         '''spawns the food when no fodo is present'''
@@ -290,6 +305,7 @@ class SnakeScene(MenuScene):
 
 
 class ScoresScene(MenuScene):
+    '''class for displaying the game's saved high scores'''
     high_scores = None
 
     def display_scene(self):
@@ -300,11 +316,11 @@ class ScoresScene(MenuScene):
         play_clicked = self.display_button_click(
             menu_button_size, (width / 2, row_height), self.colors.red, self.colors.black)
         text_rend, text_box = load_text(
-            'game_over.ttf', 70, self.colors.black, 'Play again?')
+            'game_over.ttf', 70, self.colors.black, "Play Snake?")
         self.display_centered_text(
             text_rend, text_box, (width / 2, row_height))
         # scoreboard
-        title_list = ['High Score', 'Name', 'Minutes', 'Date Played']
+        title_list = ['High Score', 'Name', 'Seconds', 'Date Played']
         text_size = 55
         title_height = 1/14
 
@@ -331,7 +347,8 @@ class ScoresScene(MenuScene):
                 rend, box, (width * width_spacer, height * title_height))
             for j in range(5):
                 text_rend, text_box = load_text(
-                    'game_over.ttf', text_size, self.colors.black, str(self.high_scores.scores_data[j][i]))
+                    'game_over.ttf', text_size, self.colors.black,
+                    str(self.high_scores.scores_data[j][i]))
                 self.display_centered_text(
                     text_rend, text_box, (width * width_spacer, height * height_spacer))
                 height_spacer += 1/7
