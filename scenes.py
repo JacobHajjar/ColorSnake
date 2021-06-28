@@ -1,4 +1,5 @@
 '''Class containing all of the game's scenes'''
+import time
 import math
 import random
 import sys
@@ -14,7 +15,7 @@ class MenuScene:
     in_scene = True
     curr_mouse = [-1, -1]
     curr_direction = 'up'
-    next_scene = 1
+    next_scene = 3
     dif_selection = 1
     player_score = None
 
@@ -106,7 +107,7 @@ class MenuScene:
             text_rend, text_box, (width * 4 / 5, row_height))
 
         if start_clicked:
-            self.next_scene = 2
+            self.next_scene = 3
             self.in_scene = False
         elif difficulty_clicked:
             if self.dif_selection < 4:
@@ -243,6 +244,12 @@ class SnakeScene(MenuScene):
                 for cell in col:
                     cell.draw_cell(self.display_surf, self.game_color)
                     cell.draw_food(self.display_surf, self.food_color)
+        else:
+            width, height = self.display_surf.get_size()
+            self.display_centered_rect((width, height), self.colors.black, 0, (width/2, height/2))
+            game_over_text, game_over_box = load_text('game_over.ttf', 80, self.colors.white, 'GAME OVER')
+            self.display_centered_text(game_over_text, game_over_box, (width/2, height/2))
+            self.fps = 0.4
 
     def create_snake(self):
         '''function that creates the '''
@@ -363,6 +370,15 @@ class ScoresScene(MenuScene):
         self.next_scene = 0
         self.high_scores = TimerScore(3000, 0)
         self.high_scores.import_scores()
+    
+class InstructionScene(MenuScene):
+    def display_scene(self):
+        instruction = pygame.image.load('instructions.jpg')
+        self.display_surf.blit(instruction, (0,0))
+        self.in_scene = self.player_score.wait_time()
+    def setup_scene(self):
+        self.player_score = TimerScore(3000, 0)
+        self.next_scene = 2
 
 
 def load_text(font, size, col, msg):

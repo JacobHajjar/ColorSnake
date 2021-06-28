@@ -21,7 +21,6 @@ class TimerScore:
         points_per_interval = 5
         if current_time >= self.begin_count + self.tick_time_ms:
             self.score += points_per_interval
-            print(self.score)
             self.begin_count = current_time
 
     def add_points(self, points):
@@ -34,7 +33,6 @@ class TimerScore:
         cur_date = today.strftime("%m/%d/%Y")
         seconds = math.floor(
             (pygame.time.get_ticks() - self.start_time) / 1000)
-        print("TIME: ", seconds)
         self.scores_data.append([self.score, player_name, seconds, cur_date])
         self.scores_data.sort(key=lambda x: x[0])
         self.scores_data.sort(reverse=True)
@@ -56,4 +54,10 @@ class TimerScore:
         '''takes the scores in from the pickle file'''
         with open('game_data.pickle', 'rb') as fh:
             self.scores_data = pickle.load(fh)
-            print(self.scores_data)
+    
+    def wait_time(self):
+        if pygame.time.get_ticks() >= self.begin_count + self.tick_time_ms:
+            return False
+        else:
+            return True
+
