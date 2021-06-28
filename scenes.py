@@ -73,7 +73,10 @@ class MenuScene:
         width, height = self.display_surf.get_size()
         row_height = height * 5 / 6
         menu_button_size = (220, 40)
-
+        
+        text_rend, text_box = load_text(
+            'title_font.otf', 100, self.colors.black, 'COLOR')
+        self.display_centered_text(text_rend, text_box, (width/2, height/6))
         text_rend, text_box = load_text(
             'title_font.otf', 120, self.colors.black, 'SNAKE')
         self.display_centered_text(text_rend, text_box, (width/2, height/3))
