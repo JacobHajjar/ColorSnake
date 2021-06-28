@@ -23,6 +23,7 @@ class SnakeGame:
     display_surf = pygame.display.set_mode((window_width, window_height))
     next_scene = 0
     pygame.display.set_caption(title)
+
     def play_snake(self):
         '''function which plays a round of snake'''
         snake_fps = 15
@@ -41,10 +42,10 @@ class SnakeGame:
                 game_scene.start_scene()
                 self.next_scene = game_scene.next_scene
             elif self.next_scene == 3:
-                instruc_scene = InstructionScene(self.colors, self.display_surf, 30)
+                instruc_scene = InstructionScene(
+                    self.colors, self.display_surf, 30)
                 instruc_scene.start_scene()
                 self.next_scene = instruc_scene.next_scene
-            
 
 
 def main():

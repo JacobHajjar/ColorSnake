@@ -54,10 +54,9 @@ class TimerScore:
         '''takes the scores in from the pickle file'''
         with open('game_data.pickle', 'rb') as fh:
             self.scores_data = pickle.load(fh)
-    
+
     def wait_time(self):
+        '''waits a certain amount of time before completing the scene'''
         if pygame.time.get_ticks() >= self.begin_count + self.tick_time_ms:
             return False
-        else:
-            return True
-
+        return True

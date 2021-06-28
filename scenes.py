@@ -246,9 +246,12 @@ class SnakeScene(MenuScene):
                     cell.draw_food(self.display_surf, self.food_color)
         else:
             width, height = self.display_surf.get_size()
-            self.display_centered_rect((width, height), self.colors.black, 0, (width/2, height/2))
-            game_over_text, game_over_box = load_text('game_over.ttf', 80, self.colors.white, 'GAME OVER')
-            self.display_centered_text(game_over_text, game_over_box, (width/2, height/2))
+            self.display_centered_rect(
+                (width, height), self.colors.black, 0, (width/2, height/2))
+            game_over_text, game_over_box = load_text(
+                'game_over.ttf', 80, self.colors.white, 'GAME OVER')
+            self.display_centered_text(
+                game_over_text, game_over_box, (width/2, height/2))
             self.fps = 0.4
 
     def create_snake(self):
@@ -370,12 +373,14 @@ class ScoresScene(MenuScene):
         self.next_scene = 0
         self.high_scores = TimerScore(3000, 0)
         self.high_scores.import_scores()
-    
+
+
 class InstructionScene(MenuScene):
     def display_scene(self):
         instruction = pygame.image.load('instructions.jpg')
-        self.display_surf.blit(instruction, (0,0))
+        self.display_surf.blit(instruction, (0, 0))
         self.in_scene = self.player_score.wait_time()
+
     def setup_scene(self):
         self.player_score = TimerScore(3000, 0)
         self.next_scene = 2
