@@ -152,7 +152,7 @@ class MenuScene:
         if start_button.collidepoint(mousex, mousey):
             bor_color = o_color
             if self.sound_enabled:
-                mixer.music.load('necessarymaterials/button_sound.mp3')
+                mixer.music.load('necessarymaterials/button_sound.wav')
                 mixer.music.play(1)
                 self.sound_enabled = False
         self.display_centered_rect(
@@ -225,7 +225,7 @@ class SnakeScene(MenuScene):
         self.in_scene = True
         self.generate_snake_grid()
         self.create_snake()
-        mixer.music.load('necessarymaterials/Poltargeist.mp3')
+        mixer.music.load('necessarymaterials/Poltargeist.ogg')
         mixer.music.set_volume(0.2)
         mixer.music.play(-1)
 
