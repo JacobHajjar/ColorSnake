@@ -5,6 +5,7 @@ import random
 import sys
 import pygame
 from pygame.locals import *
+from pygame import mixer
 from cell import Cell
 from score import TimerScore
 pygame.init()
@@ -18,6 +19,7 @@ class MenuScene:
     next_scene = 3
     dif_selection = 1
     player_score = None
+    sound_enabled = True
 
     def __init__(self, colors, display_surf, fps):
         self.colors = colors
@@ -75,16 +77,16 @@ class MenuScene:
         menu_button_size = (220, 40)
         
         text_rend, text_box = load_text(
-            'title_font.otf', 100, self.colors.black, 'COLOR')
+            'necessarymaterials/title_font.otf', 100, self.colors.black, 'COLOR')
         self.display_centered_text(text_rend, text_box, (width/2, height/6))
         text_rend, text_box = load_text(
-            'title_font.otf', 120, self.colors.black, 'SNAKE')
+            'necessarymaterials/title_font.otf', 120, self.colors.black, 'SNAKE')
         self.display_centered_text(text_rend, text_box, (width/2, height/3))
         # start button
         start_clicked = self.display_button_click(
             menu_button_size, (width / 2, row_height), self.colors.red, self.colors.black)
         text_rend, text_box = load_text(
-            'game_over.ttf', 70, self.colors.black, 'PLAY')
+            'necessarymaterials/game_over.ttf', 70, self.colors.black, 'PLAY')
         self.display_centered_text(
             text_rend, text_box, (width / 2, row_height))
         # game difficulty button
@@ -92,20 +94,20 @@ class MenuScene:
             menu_button_size, (width / 5, row_height), self.colors.lime, self.colors.black)
 
         dif_rend, dif_box = load_text(
-            'game_over.ttf', 70, self.colors.black, 'DIFFICULTY: ')
+            'necessarymaterials/game_over.ttf', 70, self.colors.black, 'DIFFICULTY: ')
 
         self.display_centered_text(
             dif_rend, dif_box, (width / 5-10, row_height))
 
         text_rend, text_box = load_text(
-            'game_over.ttf', 70, self.colors.black, str(self.dif_selection))
+            'necessarymaterials/game_over.ttf', 70, self.colors.black, str(self.dif_selection))
         self.display_left_text(
             text_rend, text_box, dif_box.bottomright)
         # highscore button
         highscore_clicked = self.display_button_click(
             menu_button_size, (width * 4 / 5, row_height), self.colors.aqua, self.colors.black)
         text_rend, text_box = load_text(
-            'game_over.ttf', 70, self.colors.black, 'HIGHSCORE')
+            'necessarymaterials/game_over.ttf', 70, self.colors.black, 'HIGHSCORE')
         self.display_centered_text(
             text_rend, text_box, (width * 4 / 5, row_height))
 
@@ -149,6 +151,10 @@ class MenuScene:
             xy_size, b_color, 0, xycenter_position)
         if start_button.collidepoint(mousex, mousey):
             bor_color = o_color
+            if self.sound_enabled:
+                mixer.music.load('necessarymaterials/button_sound.mp3')
+                mixer.music.play(1)
+                self.sound_enabled = False
         self.display_centered_rect(
             xy_size, bor_color, o_size, xycenter_position)
 
@@ -172,28 +178,27 @@ class SnakeScene(MenuScene):
         self.player_score.add_timer_points()
         self.display_surf.fill(self.colors.black)
         width, height = self.display_surf.get_size()
-
         self.spawn_food()
         self.move_snake()
         self.display_centered_rect(
             (width-self.margin * 2, height-self.margin * 2),
             self.game_color, 10, (width/2, height/2))
         score_render, score_box = load_text(
-            'game_over.ttf', 75, self.game_color, 'Score: ')
+            'necessarymaterials/game_over.ttf', 75, self.game_color, 'Score: ')
         total_score_rend, total_score_box = load_text(
-            'game_over.ttf', 75, self.game_color, str(self.player_score.score))
+            'necessarymaterials/game_over.ttf', 75, self.game_color, str(self.player_score.score))
         score_multi, score_multi_box = load_text(
-            'game_over.ttf', 75, self.game_color, "Score multiplier: x")
+            'necessarymaterials/game_over.ttf', 75, self.game_color, "Score multiplier: x")
         multi, multi_box = load_text(
-            'game_over.ttf', 75, self.game_color, str(len(self.snake_body)))
+            'necessarymaterials/game_over.ttf', 75, self.game_color, str(len(self.snake_body)))
         high_score, high_score_box = load_text(
-            'game_over.ttf', 75, self.game_color, "HIGH SCORE: ")
+            'necessarymaterials/game_over.ttf', 75, self.game_color, "HIGH SCORE: ")
         score_num = 0
         if len(self.player_score.scores_data) >= 1:
             score_num = self.player_score.scores_data[0][0]
 
         high_score_num, high_score_num_text = load_text(
-            'game_over.ttf', 75, self.game_color, str(score_num))
+            'necessarymaterials/game_over.ttf', 75, self.game_color, str(score_num))
 
         self.display_left_text(score_render, score_box,
                                (self.margin, self.margin-5))
@@ -220,6 +225,9 @@ class SnakeScene(MenuScene):
         self.in_scene = True
         self.generate_snake_grid()
         self.create_snake()
+        mixer.music.load('necessarymaterials/Poltargeist.mp3')
+        mixer.music.set_volume(0.2)
+        mixer.music.play(-1)
 
     def generate_snake_grid(self):
         '''generates the game grid for snake'''
@@ -252,7 +260,7 @@ class SnakeScene(MenuScene):
             self.display_centered_rect(
                 (width, height), self.colors.black, 0, (width/2, height/2))
             game_over_text, game_over_box = load_text(
-                'game_over.ttf', 80, self.colors.white, 'GAME OVER')
+                'necessarymaterials/game_over.ttf', 80, self.colors.white, 'GAME OVER')
             self.display_centered_text(
                 game_over_text, game_over_box, (width/2, height/2))
             self.fps = 0.4
@@ -301,6 +309,8 @@ class SnakeScene(MenuScene):
             self.snake_grid[col][row].is_snake = False
             self.snake_body.pop()
         if self.in_scene is False:
+            mixer.music.stop()
+            mixer.music.unload()
             self.player_score.save_scores("You")
 
     def spawn_food(self):
@@ -329,7 +339,7 @@ class ScoresScene(MenuScene):
         play_clicked = self.display_button_click(
             menu_button_size, (width / 2, row_height), self.colors.red, self.colors.black)
         text_rend, text_box = load_text(
-            'game_over.ttf', 70, self.colors.black, "Play Snake?")
+            'necessarymaterials/game_over.ttf', 70, self.colors.black, "Play Snake?")
         self.display_centered_text(
             text_rend, text_box, (width / 2, row_height))
         # scoreboard
@@ -338,14 +348,14 @@ class ScoresScene(MenuScene):
         title_height = 1/14
 
         rank_rend, rank_box = load_text(
-            'game_over.ttf', text_size, self.colors.black,
+            'necessarymaterials/game_over.ttf', text_size, self.colors.black,
             'Ranking#')
         self.display_centered_text(
             rank_rend, rank_box, (width * 1 / 7, height * title_height))
         height_spacer = 1/7
         for i in range(5):
             text_rend, text_box = load_text(
-                'game_over.ttf', text_size, self.colors.black, str(i+1))
+                'necessarymaterials/game_over.ttf', text_size, self.colors.black, str(i+1))
             self.display_centered_text(
                 text_rend, text_box, (width * 1 / 7, height * height_spacer))
             height_spacer += 1/7
@@ -354,13 +364,13 @@ class ScoresScene(MenuScene):
         for i, sec_title in enumerate(title_list):
             height_spacer = 1/7
             rend, box = load_text(
-                'game_over.ttf', text_size, self.colors.black,
+                'necessarymaterials/game_over.ttf', text_size, self.colors.black,
                 sec_title)
             self.display_centered_text(
                 rend, box, (width * width_spacer, height * title_height))
             for j in range(5):
                 text_rend, text_box = load_text(
-                    'game_over.ttf', text_size, self.colors.black,
+                    'necessarymaterials/game_over.ttf', text_size, self.colors.black,
                     str(self.high_scores.scores_data[j][i]))
                 self.display_centered_text(
                     text_rend, text_box, (width * width_spacer, height * height_spacer))
@@ -380,7 +390,7 @@ class ScoresScene(MenuScene):
 
 class InstructionScene(MenuScene):
     def display_scene(self):
-        instruction = pygame.image.load('instructions.jpg')
+        instruction = pygame.image.load('necessarymaterials/instructions.jpg')
         self.display_surf.blit(instruction, (0, 0))
         self.in_scene = self.player_score.wait_time()
 
